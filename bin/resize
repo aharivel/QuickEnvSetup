@@ -1,0 +1,16 @@
+#!/bin/sh
+
+stty -echo && trap 'stty echo' EXIT
+
+printf '\0337\033[r\033[999;999H\033[6n\r'
+read -r -d R x < /dev/tty
+printf '%s\n' "$x" | sed 's/[^0-9]/ /g' |
+{
+        read -r rows cols
+        stty rows $rows columns $cols < /dev/tty
+        echo "COLUMNS=$cols;"
+	echo "LINES=$rows;"
+        echo "export COLUMNS LINES;"
+}
+
+kill -WINCH $(ps -o ppid= $$)
